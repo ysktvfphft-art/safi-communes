@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en" class=""><head><script>window.livecodes = window.livecodes || {};</script><title>Untitled Project</title><meta name="title" content="Untitled Project"><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"><style id="__livecodes_styles__"></style><script src="https://cdn.jsdelivr.net/npm/es-module-shims@1.10.0/dist/es-module-shims.js" async=""></script><script type="importmap">{
+  "imports": {}
+}</script></head><body>
+
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atlas interactif – Province de Safi</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<style>
+:root{--bg:#0f172a;--panel:#ffffffee;--ink:#0f172a;--mut:#64748b;--acc:#0e7490;--acc2:#f59e0b}
+*{box-sizing:border-box}html,body{height:100%;margin:0;font-family:"Segoe UI",system-ui,sans-serif;color:var(--ink)}
+#app{display:flex;height:100%;overflow:hidden}
+aside{width:290px;background:var(--bg);color:#e2e8f0;display:flex;flex-direction:column;z-index:1000;flex:none}
+aside h1{font-size:17px;margin:0;padding:18px 18px 4px}
+aside .sub{font-size:12px;color:#94a3b8;padding:0 18px 12px}
+aside input[type=text],aside select{margin:0 18px 10px;padding:9px 10px;border-radius:8px;border:1px solid #334155;background:#1e293b;color:#fff;font-size:13px;width:calc(100% - 36px)}
+aside label.t{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;padding:0 18px 4px;display:block}
+.chk{padding:0 18px 12px;font-size:13px;display:flex;gap:8px;align-items:center;cursor:pointer}
+#list{flex:1;overflow:auto;border-top:1px solid #1e293b}
+#list div{padding:10px 18px;font-size:13px;cursor:pointer;display:flex;justify-content:space-between;border-bottom:1px solid #1e293b;transition:.15s}
+#list div:hover{background:#1e293b;padding-left:24px}
+#list small{color:#94a3b8}
+#map{flex:1;background:#cbd5e1;min-width:0}
+.legend{background:var(--panel);padding:10px 12px;border-radius:10px;font-size:12px;box-shadow:0 4px 14px #0003}
+.legend i{display:inline-block;width:14px;height:14px;margin-right:6px;border-radius:3px;vertical-align:-2px}
+.leaflet-interactive{transition:fill-opacity .25s}
+/* étiquettes des communes */
+.lbl{background:transparent;border:0;box-shadow:none;font-weight:700;font-size:11px;color:#0f172a;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 4px #fff;padding:0;white-space:nowrap}
+.lbl::before{display:none}
+.zs .lbl{font-size:9px}.zl .lbl{font-size:13px}
+.sat .lbl{color:#fff;text-shadow:0 0 3px #000,0 0 4px #000}
+.nolbl .lbl{display:none}
+/* panneau droit */
+#detail{width:0;background:#fff;box-shadow:-8px 0 30px #0003;transition:width .35s ease;overflow:hidden;flex:none;z-index:1100}
+#detail.on{width:430px}
+#dIn{width:430px;height:100%;overflow-y:auto}
+.hd{background:linear-gradient(135deg,#0e7490,#164e63);color:#fff;padding:20px 22px;position:sticky;top:0;z-index:2}
+.hd small{opacity:.75;font-size:11px;letter-spacing:1.5px;text-transform:uppercase}
+.hd h2{margin:4px 0 0;font-size:24px}
+.x{position:absolute;right:14px;top:14px;background:#fff2;border:0;color:#fff;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer}
+.x:hover{background:#fff4}
+.bd{padding:18px 22px 30px}
+h3{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--mut);margin:22px 0 8px}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.k{background:#f1f5f9;border-radius:12px;padding:12px}
+.k span{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px}
+.k b{display:block;font-size:18px;margin-top:2px}
+.k.hl{background:linear-gradient(135deg,#ecfeff,#cffafe)}
+.box{position:relative;height:210px}
+.rkbox{max-height:280px;overflow:auto;border:1px solid #e2e8f0;border-radius:10px;padding:6px}
+.rkbox>div{position:relative}
+select.rs{padding:6px 8px;border-radius:8px;border:1px solid #cbd5e1;font-size:12px;margin-bottom:8px}
+.share{height:10px;background:#e2e8f0;border-radius:6px;overflow:hidden;margin-top:6px}
+.share i{display:block;height:100%;background:linear-gradient(90deg,#0e7490,#22d3ee);width:0;transition:width .9s}
+@media(max-width:900px){aside{display:none}#detail.on{position:fixed;right:0;top:0;bottom:0;width:min(430px,100%)}#dIn{width:100%}}
+</style>
+
+
+<div id="app">
+ <aside>
+  <h1>🗺️ Province de Safi</h1>
+  <div class="sub">Atlas interactif des communes · Population 2024</div>
+  <label class="t">Rechercher</label><input type="text" id="q" placeholder="Nom de la commune…">
+  <label class="t">Indicateur cartographié</label>
+  <select id="ind">
+   <option value="pop">Population totale</option>
+   <option value="dens">Densité (hab/km²)</option>
+   <option value="fem">Part des femmes (%)</option>
+   <option value="men">Nombre de ménages</option>
+  </select>
+  
+  <label class="t">Palette de couleurs</label>
+  <select id="pal">
+   <option value="ambre">Ambre (jaune → brun)</option>
+   <option value="bleu">Bleu</option>
+   <option value="vert">Vert</option>
+   <option value="rouge">Rouge</option>
+   <option value="violet">Violet</option>
+  </select>
+  
+  <label class="chk"><input type="checkbox" id="showL" checked=""> Afficher les noms des communes</label>
+  <div id="list"></div>
+ </aside>
+ <div id="map"></div>
+ <div id="detail"><div id="dIn"></div></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const URL_DATA="https://cartomaroc.com/x/Cmn-Safi.geojson";
+const fmt=n=>Number(n).toLocaleString("fr-FR",{maximumFractionDigits:1});
+const map=L.map("map",{zoomControl:false}).setView([32.2,-9],9);
+L.control.zoom({position:"topright"}).addTo(map);
+
+/* Fonds de carte */
+const base={
+ "OpenStreetMap":L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap"}),
+ "Satellite":L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{attribution:"© Esri"}),
+ "Relief":L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",{attribution:"© OpenTopoMap"})
+};
+base["OpenStreetMap"].addTo(map);
+L.control.layers(base,null,{position:"topright",collapsed:false}).addTo(map);
+map.on("baselayerchange",e=>map.getContainer().classList.toggle("sat",e.name==="Satellite"));
+
+const props=f=>{const p=f.properties;return{
+ name:p.NomFr,pop:p.Pop__24,m:p.Pop__mascu,f:p.Pop__femin,men:p.Pop__menag,km:p.km,
+ dens:p.Pop__24/p.km,fem:100*p.Pop__femin/(p.Pop__mascu+p.Pop__femin)}};
+const val={pop:p=>p.pop,dens:p=>p.dens,fem:p=>p.fem,men:p=>p.men,km:p=>p.km};
+const palettes={
+ ambre:["#fef3c7","#fcd34d","#f59e0b","#d97706","#92400e"],
+ bleu:["#dbeafe","#93c5fd","#3b82f6","#1d4ed8","#1e3a8a"],
+ vert:["#dcfce7","#86efac","#22c55e","#15803d","#14532d"],
+ rouge:["#fee2e2","#fca5a5","#ef4444","#b91c1c","#7f1d1d"],
+ violet:["#ede9fe","#c4b5fd","#8b5cf6","#6d28d9","#4c1d95"]
+};
+let ramp=palettes.ambre;
+const SEL={weight:4,color:"#0e7490",fillOpacity:.95};
+let layer,data=[],breaks=[],legend,sel=null,charts={},avg={},tot={};
+
+function color(v){let i=0;while(i<breaks.length&&v>breaks[i])i++;return ramp[Math.min(i,4)]}
+function style(f){const k=document.getElementById("ind").value;
+ return{fillColor:color(val[k](props(f))),fillOpacity:.72,color:"#fff",weight:1.5}}
+function compute(){
+ const k=document.getElementById("ind").value;
+ const v=data.map(d=>val[k](d.p)).sort((a,b)=>a-b);
+ breaks=[1,2,3,4].map(i=>v[Math.floor(i*v.length/5)]);
+ layer.eachLayer(l=>l.setStyle(style(l.feature)));
+ if(sel)sel.setStyle(SEL);
+ drawLegend();
+}
+function drawLegend(){
+ if(legend)legend.remove();
+ legend=L.control({position:"bottomleft"});
+ legend.onAdd=()=>{const d=L.DomUtil.create("div","legend");
+  const lim=[0,...breaks];
+  d.innerHTML="<b>"+document.querySelector("#ind option:checked").text+"</b><br>"+
+   ramp.map((c,i)=>`<div><i style="background:${c}"></i>${fmt(lim[i])}${breaks[i]!==undefined?" – "+fmt(breaks[i]):"+"}</div>`).join("");
+  return d};
+ legend.addTo(map);
+}
+
+/* Panneau de détails */
+const unitOf={pop:"hab.",dens:"hab/km²",men:"ménages",km:"km²"};
+const nameOf={pop:"Population",dens:"Densité",men:"Ménages",km:"Superficie"};
+function kill(){Object.values(charts).forEach(c=>c&&c.destroy());charts={}}
+
+function openPanel(l){
+ if(sel&&sel!==l)layer.resetStyle(sel),sel.setStyle(style(sel.feature));
+ sel=l;l.setStyle(SEL);l.bringToFront();
+ const p=l._p;kill();
+ const pm=100*p.m/(p.m+p.f), share=100*p.pop/tot.pop;
+ const rank=[...data].sort((a,b)=>b.p.pop-a.p.pop).findIndex(d=>d.p.name===p.name)+1;
+ document.getElementById("dIn").innerHTML=`
+ <div class="hd"><button class="x" onclick="closePanel()">✕</button><small>Commune · Province de Safi</small><h2>${p.name}</h2></div>
+ <div class="bd">
+  <div class="g">
+   <div class="k hl"><span>Population 2024</span><b>${fmt(p.pop)}</b></div>
+   <div class="k hl"><span>Rang démographique</span><b>${rank} / ${data.length}</b></div>
+   <div class="k"><span>Ménages</span><b>${fmt(p.men)}</b></div>
+   <div class="k"><span>Superficie</span><b>${fmt(p.km)} km²</b></div>
+   <div class="k"><span>Densité</span><b>${fmt(p.dens)} hab/km²</b></div>
+   <div class="k"><span>Taille moy. ménage</span><b>${fmt(p.pop/p.men)} pers.</b></div>
+   <div class="k"><span>Hommes / 100 femmes</span><b>${fmt(100*p.m/p.f)}</b></div>
+   <div class="k"><span>Part de l'Province</span><b>${fmt(share)} %</b></div>
+  </div>
+  <div class="share"><i id="shb"></i></div>
+
+  <h3>Répartition par sexe</h3>
+  <div class="box"><canvas id="c1"></canvas></div>
+
+  <h3>Comparaison avec la moyenne provinciale</h3>
+  <div class="box"><canvas id="c2"></canvas></div>
+
+  <h3>Classement des communes</h3>
+  <select class="rs" id="rs">
+   <option value="pop">Population</option><option value="dens">Densité</option>
+   <option value="men">Ménages</option><option value="km">Superficie</option>
+  </select>
+  <div class="rkbox" id="rkb"><div id="rkh"><canvas id="c3"></canvas></div></div>
+ </div>`;
+ document.getElementById("detail").classList.add("on");
+ setTimeout(()=>{
+  map.invalidateSize();
+  map.flyToBounds(l.getBounds(),{padding:[50,50],duration:.9,maxZoom:12});
+  document.getElementById("shb").style.width=Math.min(100,share*4)+"%";
+  drawCharts(p);
+ },380);
+ document.getElementById("rs").onchange=()=>drawRank(p);
+}
+function closePanel(){
+ document.getElementById("detail").classList.remove("on");
+ if(sel){sel.setStyle(style(sel.feature));sel=null}
+ setTimeout(()=>map.invalidateSize(),380);
+}
+
+function drawCharts(p){
+ const pm=100*p.m/(p.m+p.f);
+ charts.c1=new Chart(document.getElementById("c1"),{type:"doughnut",
+  data:{labels:["Hommes","Femmes"],datasets:[{data:[p.m,p.f],backgroundColor:["#0e7490","#f59e0b"],borderWidth:3,borderColor:"#fff"}]},
+  options:{maintainAspectRatio:false,cutout:"62%",animation:{animateRotate:true,duration:1100},
+   plugins:{legend:{position:"right"},tooltip:{callbacks:{label:c=>`${c.label}: ${fmt(c.raw)} (${fmt(100*c.raw/(p.m+p.f))}%)`}}}}});
+ const idx=k=>100*val[k](p)/avg[k];
+ const keys=["pop","dens","men","km"],vals=keys.map(idx);
+ charts.c2=new Chart(document.getElementById("c2"),{type:"bar",
+  data:{labels:keys.map(k=>nameOf[k]),datasets:[{label:"Indice (moyenne = 100)",data:vals,
+   backgroundColor:vals.map(v=>v>=100?"#0e7490":"#f59e0b"),borderRadius:6}]},
+  options:{maintainAspectRatio:false,animation:{duration:1000,easing:"easeOutQuart"},
+   plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{const k=keys[c.dataIndex];return `${fmt(val[k](p))} ${unitOf[k]} · indice ${fmt(c.raw)} (moy. ${fmt(avg[k])})`}}}},
+   scales:{y:{beginAtZero:true,title:{display:true,text:"Moyenne provinciale = 100"}}}}});
+ drawRank(p);
+}
+function drawRank(p){
+ const k=document.getElementById("rs").value;
+ const arr=[...data].sort((a,b)=>val[k](b.p)-val[k](a.p));
+ document.getElementById("rkh").style.height=(arr.length*22+30)+"px";
+ if(charts.c3)charts.c3.destroy();
+ charts.c3=new Chart(document.getElementById("c3"),{type:"bar",
+  data:{labels:arr.map(d=>d.p.name),datasets:[{data:arr.map(d=>val[k](d.p)),
+   backgroundColor:arr.map(d=>d.p.name===p.name?"#0e7490":"#cbd5e1"),borderRadius:4}]},
+  options:{indexAxis:"y",maintainAspectRatio:false,animation:{duration:900},
+   plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${fmt(c.raw)} ${unitOf[k]}`}}},
+   scales:{y:{ticks:{font:{size:10}}},x:{beginAtZero:true}}}});
+ const i=arr.findIndex(d=>d.p.name===p.name);
+ document.getElementById("rkb").scrollTop=Math.max(0,i*22-80);
+}
+
+/* Construction de la carte */
+function build(gj){
+ gj.features=gj.features.filter(f=>f.geometry&&f.geometry.coordinates&&f.geometry.coordinates.length);
+ data=gj.features.map(f=>({f,p:props(f)}));
+ tot.pop=data.reduce((s,d)=>s+d.p.pop,0);
+ ["pop","dens","men","km"].forEach(k=>avg[k]=data.reduce((s,d)=>s+val[k](d.p),0)/data.length);
+ layer=L.geoJSON(gj,{style,onEachFeature:(f,l)=>{
+  const p=props(f);l._p=p;
+  l.bindTooltip(p.name,{permanent:true,direction:"center",className:"lbl"});
+  l.on({
+   mouseover:()=>{if(l!==sel){l.setStyle({weight:3,color:"#0e7490",fillOpacity:.92});l.bringToFront()}},
+   mouseout:()=>{if(l!==sel)l.setStyle(style(f))},
+   click:()=>openPanel(l)
+  })}}).addTo(map);
+ map.fitBounds(layer.getBounds());
+ compute();
+ const list=document.getElementById("list");
+ const render=t=>{list.innerHTML="";
+  data.filter(d=>d.p.name.toLowerCase().includes(t.toLowerCase())).sort((a,b)=>a.p.name.localeCompare(b.p.name)).forEach(d=>{
+   const e=document.createElement("div");e.innerHTML=`<span>${d.p.name}</span><small>${fmt(d.p.pop)}</small>`;
+   e.onclick=()=>layer.eachLayer(l=>{if(l._p.name===d.p.name)openPanel(l)});
+   list.appendChild(e)})};
+ render("");document.getElementById("q").oninput=e=>render(e.target.value);
+}
+document.getElementById("ind").onchange=compute;
+document.getElementById("pal").onchange=e=>{ramp=palettes[e.target.value];compute()};
+document.getElementById("showL").onchange=e=>map.getContainer().classList.toggle("nolbl",!e.target.checked);
+const zc=()=>{const z=map.getZoom(),c=map.getContainer();c.classList.toggle("zs",z<=9);c.classList.toggle("zl",z>=11)};
+map.on("zoomend",zc);zc();
+
+fetch(URL_DATA).then(r=>r.json()).then(build).catch(()=>{
+ const i=document.createElement("input");i.type="file";i.accept=".geojson,.json";
+ i.style.cssText="position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:3000;background:#fff;padding:10px;border-radius:10px;box-shadow:0 4px 14px #0004";
+ document.body.appendChild(i);
+ i.onchange=()=>i.files[0].text().then(t=>{build(JSON.parse(t));i.remove()});
+});
+</script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;2d94c76182694a68be60c329ecb5aace&quot;,&quot;r&quot;:1,&quot;spa&quot;:2}" crossorigin="anonymous"></script>
+
+<script></script></body></html>
