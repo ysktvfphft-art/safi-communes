@@ -91,8 +91,8 @@ select.rs{padding:6px 8px;border-radius:8px;border:1px solid #cbd5e1;font-size:1
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
-const URL_DATA="https://cartomaroc.com/x/Cmn-Safi.geojson";
-const fmt=n=>Number(n).toLocaleString("fr-FR",{maximumFractionDigits:1});
+const URL_DATA="https://raw.githubusercontent.com/ysktvfphft-art/safi-communes/refs/heads/main/Cmn--Safi.geojson";
+  const fmt=n=>Number(n).toLocaleString("fr-FR",{maximumFractionDigits:1});
 const map=L.map("map",{zoomControl:false}).setView([32.2,-9],9);
 L.control.zoom({position:"topright"}).addTo(map);
 
